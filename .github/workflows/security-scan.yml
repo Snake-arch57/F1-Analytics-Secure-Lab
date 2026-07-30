@@ -1,0 +1,33 @@
+name: security-scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 6 * * 1"
+
+jobs:
+  bandit:
+    name: Análise estática (Bandit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - run: pip install bandit
+      - run: bandit -r . -x ./.venv,./tests -f screen
+        continue-on-error: true
+
+  trivy:
+    name: Vulnerabilidades de dependências (Trivy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          exit-code: "0"
