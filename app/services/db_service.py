@@ -10,13 +10,13 @@ class DBService:
         self.password = os.getenv("POSTGRES_PASSWORD", "f1_local_dev_password")
         self.host = os.getenv("POSTGRES_HOST", "postgres")
         
-    def execute_query(self, sql):
+    def execute_query(self, sql, params=None):
         try:
             conn = psycopg2.connect(
                 dbname=self.dbname, user=self.user, password=self.password, host=self.host, port=5432
             )
             cur = conn.cursor()
-            cur.execute(sql)
+            cur.execute(sql, params)
             if cur.description:
                 colnames = [desc[0] for desc in cur.description]
                 results = [dict(zip(colnames, row)) for row in cur.fetchall()]
@@ -77,24 +77,24 @@ def save_processed_session_data(session_info, laps_data):
             season = int(laps_data.get('year', season))
             session_type = str(laps_data.get('session_type', session_type))
 
-        event_name = event_name.replace("'", "''")
+        pass  # escape agora e feito pelo driver
 
-        sql_session = f"""
+        sql_session = """
             INSERT INTO f1.sessions (season, event_name, session_type)
-            VALUES ({season}, '{event_name}', '{session_type}')
+            VALUES (%s, %s, %s)
             ON CONFLICT (season, event_name, session_type) 
             DO UPDATE SET event_name = EXCLUDED.event_name
             RETURNING id;
         """
-        res_session = db.execute_query(sql_session)
+        res_session = db.execute_query(sql_session, (season, event_name, session_type))
         if not res_session:
-            sql_get_id = f"""
-                SELECT id FROM f1.sessions WHERE season={season} AND event_name='{event_name}' AND session_type='{session_type}';
+            sql_get_id = """
+                SELECT id FROM f1.sessions WHERE season=%s AND event_name=%s AND session_type=%s;
             """
-            res_session = db.execute_query(sql_get_id)
+            res_session = db.execute_query(sql_get_id, (season, event_name, session_type))
         
         session_id = res_session[0]['id']
-        db.execute_query(f"DELETE FROM f1.laps WHERE session_id = {session_id};")
+        db.execute_query("DELETE FROM f1.laps WHERE session_id = %s;", (session_id,))
 
         # Carga direta das voltas via FastF1
         laps_list = []
@@ -135,26 +135,26 @@ def save_processed_session_data(session_info, laps_data):
             if lap_time_seconds is None:
                 continue
 
-            team_name = str(team_raw).replace("'", "''")
-            driver_name = str(driver_raw).replace("'", "''")
+            team_name = str(team_raw)
+            driver_name = str(driver_raw)
 
-            sql_team = f"""
-                INSERT INTO f1.teams (team_name) VALUES ('{team_name}') ON CONFLICT (team_name) DO UPDATE SET team_name = EXCLUDED.team_name RETURNING id;
+            sql_team = """
+                INSERT INTO f1.teams (team_name) VALUES (%s) ON CONFLICT (team_name) DO UPDATE SET team_name = EXCLUDED.team_name RETURNING id;
             """
-            res_team = db.execute_query(sql_team)
+            res_team = db.execute_query(sql_team, (team_name,))
             team_id = res_team[0]['id']
 
-            sql_driver = f"""
-                INSERT INTO f1.drivers (abbreviation, full_name, current_team) VALUES ('{driver_name}', '{driver_name}', '{team_name}') ON CONFLICT (abbreviation) DO UPDATE SET current_team = EXCLUDED.current_team RETURNING id;
+            sql_driver = """
+                INSERT INTO f1.drivers (abbreviation, full_name, current_team) VALUES (%s, %s, %s) ON CONFLICT (abbreviation) DO UPDATE SET current_team = EXCLUDED.current_team RETURNING id;
             """
-            res_driver = db.execute_query(sql_driver)
+            res_driver = db.execute_query(sql_driver, (driver_name, driver_name, team_name))
             driver_id = res_driver[0]['id']
 
-            sql_lap = f"""
+            sql_lap = """
                 INSERT INTO f1.laps (session_id, driver_id, team_id, lap_number, lap_time_seconds)
-                VALUES ({session_id}, {driver_id}, {team_id}, {int(lap_num_raw)}, {float(lap_time_seconds)});
+                VALUES (%s, %s, %s, %s, %s);
             """
-            db.execute_query(sql_lap)
+            db.execute_query(sql_lap, (session_id, driver_id, team_id, int(lap_num_raw), float(lap_time_seconds)))
             inserted_count += 1
             
         print(f"✅ Sessão {event_name} salva com sucesso! ({inserted_count} voltas processadas)")
