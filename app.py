@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import state
 import callbacks
 import sidebar
@@ -108,9 +109,53 @@ header { background-color: transparent !important; }
 [data-testid="stChatInput"] > div:focus-within {
     border-color: var(--f1-red) !important;
 }
+
+/* Menu 3 pontinhos: mantem so o seletor de tema */
+[data-testid="stMainMenuPopover"] > div > *:nth-child(n+2),
+[data-testid="stMainMenuPopover"] ul > li:nth-child(n+2),
+[data-testid="stMainMenuList"] > *:nth-child(n+2) {
+    display: none !important;
+}
+
+/* rodape "Made with Streamlit" dentro do menu */
+[data-testid="stMainMenuInfo"],
+[data-testid="stMainMenuPopover"] footer,
+[data-testid="stMainMenuPopover"] a[href*="streamlit.io"],
+[data-testid="stMainMenuPopover"] *:has(> a[href*="streamlit.io"]),
+[data-testid="stMainMenuPopover"] hr,
+[data-testid="stMainMenuPopover"] hr ~ * {
+    display: none !important;
+}
 </style>
 """
 st.markdown(chat_css, unsafe_allow_html=True)
+
+# Remove o rodape "Made with Streamlit" do menu (o menu so renderiza ao abrir,
+# por isso o observer). components.html e necessario: st.markdown nao executa JS.
+components.html(
+    """
+    <script>
+    const doc = window.parent.document;
+
+    function limpar() {
+        doc.querySelectorAll('a[href*="streamlit.io"]').forEach(function (a) {
+            const alvo = a.closest('li, [role="menuitem"], div') || a;
+            alvo.style.display = 'none';
+        });
+        doc.querySelectorAll('span, p, div, li').forEach(function (el) {
+            if (el.children.length === 0 && /Made with Streamlit/i.test(el.textContent)) {
+                const alvo = el.closest('li, [role="menuitem"]') || el.parentElement || el;
+                alvo.style.display = 'none';
+            }
+        });
+    }
+
+    limpar();
+    new MutationObserver(limpar).observe(doc.body, { childList: true, subtree: true });
+    </script>
+    """,
+    height=0,
+)
 
 # 1. Renderiza a sidebar
 sessions = chat_controller.get_all_sessions()
