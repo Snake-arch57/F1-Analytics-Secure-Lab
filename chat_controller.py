@@ -110,13 +110,20 @@ def get_ai_stream_response(user_prompt: str, session_id: int):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT team_name, season, avg_lap_time_seconds FROM team_performance LIMIT 5;")
-        rows = cur.fetchall()
+        # A view team_performance devolve 5 blocos de texto ja formatados
+        # (ranking, pilotos, GPs, melhores voltas e instrucoes) no campo team_name.
+        cur.execute("SELECT team_name FROM team_performance;")
+        blocos = [r[0].strip() for r in cur.fetchall() if r[0] and r[0].strip()]
         cur.close()
         conn.close()
-        context = "Dados recentes:\n" + "\n".join([f"{r[0]} ({r[1]}): {r[2]}s" for r in rows])
-    except:
-        pass
+        # o bloco de INSTRUCOES vai por ultimo, onde o modelo lhe da mais peso
+        blocos.sort(key=lambda b: b.startswith("INSTRUCOES"))
+        context = "\n\n".join(blocos)
+    except Exception as e:
+        print(f"[chat] falha ao montar contexto: {e}")
+
+    if not context.strip():
+        context = "Nenhum dado da temporada foi carregado no banco ainda."
 
     history = get_chat_messages(session_id) if session_id else []
     messages = [{"role": "system", "content": SYSTEM_PROMPT + "\n\n[DADOS DO BANCO]:\n" + context}]
