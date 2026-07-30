@@ -23,7 +23,7 @@ carregados no banco.
 
 ## 📋 Pré-requisitos
 
-- **Docker Engine 20.10+** com o plugin **Compose v2** (`docker compose`, sem hífen)
+- **Git** e **Docker Engine 20.10+** com o plugin **Compose v2** (`docker compose`, sem hífen)
 - **4 GB de RAM** livres e ~3 GB de disco
 - **Conta gratuita na Groq** para a chave de API (veja a seção abaixo)
 - **Acesso à internet** no host — o FastF1 baixa os dados direto da F1
@@ -154,12 +154,19 @@ docker compose exec postgres psql -U f1_app -d f1_analytics -c "\dt" -c "\dv"
 Sem esta etapa o chat funciona, mas responde que não possui dados.
 
 ```bash
-# uma temporada
+# temporada atual (padrão quando nenhum ano é informado)
+docker compose exec app python load_seasons.py 2026
+
+# uma temporada específica
 docker compose exec app python load_seasons.py 2024
 
-# várias
+# várias de uma vez
 docker compose exec app python load_seasons.py 2024 2025 2026
 ```
+
+O assistente responde sempre sobre a **temporada mais recente que existir no
+banco**. Se você carregar 2024 e 2026, as perguntas serão respondidas com dados
+de 2026; os de 2024 continuam armazenados, mas fora do contexto da IA.
 
 A primeira carga é demorada: o FastF1 baixa cada Grande Prêmio da API oficial.
 Os downloads ficam em cache no volume `fastf1_cache`, então cargas seguintes
@@ -169,10 +176,10 @@ Opções via variável de ambiente:
 
 ```bash
 # testar com apenas 2 corridas
-docker compose exec -e LIMIT_EVENTS=2 app python load_seasons.py 2024
+docker compose exec -e LIMIT_EVENTS=2 app python load_seasons.py 2026
 
 # incluir classificação e treinos além da corrida
-docker compose exec -e SESSION_TYPES=R,Q,FP1 app python load_seasons.py 2024
+docker compose exec -e SESSION_TYPES=R,Q,FP1 app python load_seasons.py 2026
 ```
 
 Corridas que ainda não aconteceram são puladas automaticamente.
@@ -239,6 +246,7 @@ As conversas ficam salvas no PostgreSQL e sobrevivem a reinícios do container.
 | `port is already allocated` | Porta 8501 em uso | Troque `APP_PORT` no `.env` e suba de novo |
 | "Não consegui gerar a resposta agora" | Chave Groq ausente, inválida ou sem cota | `docker compose logs app` mostra o erro real |
 | IA diz que não tem dados | Banco vazio | Rode a etapa 5 (carga de dados) |
+| IA responde sobre outra temporada | A view usa a temporada mais recente do banco | Carregue o ano desejado; ele passa a ser o mais recente |
 | Carga falha em uma corrida específica | Sessão indisponível no FastF1 | Normal; o script segue para a próxima |
 | Postgres não fica `healthy` | Senha ausente no `.env` | Preencha `POSTGRES_PASSWORD` e recrie: `docker compose down -v && docker compose up -d` |
 | Página não abre remotamente | Firewall bloqueando | `sudo firewall-cmd --add-port=8501/tcp --permanent && sudo firewall-cmd --reload` |
