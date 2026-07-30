@@ -1,3 +1,4 @@
+import time
 import streamlit as st
 import streamlit.components.v1 as components
 import state
@@ -167,6 +168,23 @@ chat_container = st.container(key=f"chat_container_v_{state.get_chat_version()}"
 
 # 3. Declara o input na raiz (fixo no rodapé)
 prompt = chat_view.render_chat_input()
+
+# --- guardas de uso: tamanho da pergunta e intervalo entre envios ---
+MAX_CHARS = 2000
+INTERVALO_SEGUNDOS = 3
+
+if prompt:
+    if len(prompt) > MAX_CHARS:
+        st.error(
+            f"Pergunta muito longa ({len(prompt)} caracteres). "
+            f"O limite e {MAX_CHARS}."
+        )
+        prompt = None
+    elif time.time() - st.session_state.get("ultimo_envio", 0) < INTERVALO_SEGUNDOS:
+        st.warning("Aguarde alguns segundos antes da proxima pergunta.")
+        prompt = None
+    else:
+        st.session_state.ultimo_envio = time.time()
 
 # 4. Injeta a renderização e o fluxo de mensagens dentro do container seguro
 with chat_container:
