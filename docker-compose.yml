@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # --- SERVIÇO DA APLICAÇÃO (STREAMLIT / PYTHON) ---
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: f1_analytics_app
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    # Mapeamento do código fonte, caches e logs
+    volumes:
+      - .:/app
+      - fastf1_cache:/app/data/cache/fastf1
+      - app_logs:/app/logs/app
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-f1_analytics}
+      POSTGRES_USER: ${POSTGRES_USER:-f1_app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-f1_local_dev_password}
+      POSTGRES_HOST: postgres
+      PYTHONPATH: /app/app # Define a raiz do código Python para evitar ModuleNotFoundError
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    ports:
+      - "${APP_PORT:-8501}:8501"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    networks:
+      - frontend
+      - backend
+
+  # --- SERVIÇO DO BANCO DE DADOS (POSTGRESQL - ISOLADO) ---
+  postgres:
+    image: postgres:16-alpine
+    container_name: f1_analytics_postgres
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-f1_analytics}
+      POSTGRES_USER: ${POSTGRES_USER:-f1_app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-f1_local_dev_password}
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-f1_app} -d ${POSTGRES_DB:-f1_analytics}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    networks:
+      - backend
+    # HARDENING: Nenhuma porta 'ports' exposta externamente ao host.
+
+volumes:
+  postgres_data:
+  fastf1_cache:
+  app_logs:
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+    internal: true

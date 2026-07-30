@@ -1,0 +1,116 @@
+/* F1 Analytics Secure Lab
+   Regra de ouro: nenhuma cor de fundo ou texto aqui.
+   Fundo e texto vem do config.toml. Painel = veu cinza translucido. */
+
+.stApp { font-family: var(--f1-font) !important; }
+
+h1, h2, h3, h4 {
+    font-family: var(--f1-font) !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em !important;
+}
+
+/* header nativo encolhido, mas o menu (troca de tema) continua acessivel */
+header[data-testid="stHeader"] { background: transparent !important; height: 0 !important; }
+[data-testid="stToolbar"] { visibility: visible !important; }
+[data-testid="stSidebarNav"] { display: none !important; }
+
+/* ---- Hero ---- */
+.f1-hero {
+    padding: 2.2rem 0 1.6rem 0;
+    border-bottom: 1px solid var(--f1-line);
+    margin-bottom: 1.8rem;
+    position: relative;
+}
+.f1-hero::after {
+    content: ""; position: absolute; bottom: -1px; left: 0;
+    width: 90px; height: 3px; background: var(--f1-red);
+}
+.f1-hero h1 { font-size: 2.4rem !important; margin: .4rem 0 .6rem 0 !important; }
+.f1-hero p  { opacity: .68; font-size: 1.02rem; margin: 0; }
+.f1-badge {
+    display: inline-block; font-size: .72rem; font-weight: 700;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--f1-red); border: 1px solid var(--f1-red);
+    border-radius: 999px; padding: 4px 12px;
+}
+
+/* ---- Cards ---- */
+.f1-card-grid {
+    display: grid; gap: 14px; margin: 1rem 0 2rem 0;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+.f1-card {
+    background: var(--f1-veil);
+    border: 1px solid var(--f1-line);
+    border-left: 3px solid transparent;
+    border-radius: 10px; padding: 16px 18px;
+    transition: all .18s ease-in-out;
+}
+.f1-card:hover { border-left-color: var(--f1-red); transform: translateY(-2px); }
+.f1-card h3 { font-size: 1rem !important; margin: 0 0 6px 0 !important; }
+.f1-card p  { font-size: .88rem; opacity: .68; margin: 0; }
+
+.f1-section-title {
+    font-size: .75rem; font-weight: 700; letter-spacing: .16em;
+    text-transform: uppercase; opacity: .7;
+    border-left: 3px solid var(--f1-red);
+    padding-left: 10px; margin: 1.6rem 0 .9rem 0;
+}
+
+/* ---- Metricas ---- */
+div[data-testid="stMetric"] {
+    background: var(--f1-veil) !important;
+    border: 1px solid var(--f1-line) !important;
+    border-radius: 10px !important; padding: 15px !important;
+    transition: all .2s ease-in-out !important;
+}
+div[data-testid="stMetric"]:hover {
+    border-color: var(--f1-red) !important;
+    transform: translateY(-2px); cursor: pointer;
+}
+
+/* ---- Input flutuante ---- */
+div[data-testid="stChatInput"] {
+    position: fixed !important; bottom: 30px !important;
+    left: 55% !important; transform: translateX(-50%) !important;
+    width: 50% !important;
+    background: var(--f1-veil-strong) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid var(--f1-line) !important;
+    border-radius: 14px !important; z-index: 9999 !important;
+}
+div[data-testid="stChatInput"]:focus-within { border-color: var(--f1-red) !important; }
+div[data-testid="stChatInput"] textarea {
+    background: transparent !important; font-family: var(--f1-font) !important;
+}
+
+/* ---- Sidebar ---- */
+[data-testid="stSidebar"] > div:first-child { border-top: 3px solid var(--f1-red); }
+[data-testid="stSidebar"] button {
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    text-align: left !important;
+    font-family: var(--f1-font) !important;
+    transition: all .2s ease !important;
+}
+[data-testid="stSidebar"] button:hover {
+    background: var(--f1-veil) !important;
+    border-left: 3px solid var(--f1-red) !important;
+}
+[class*="st-key-del_"] button, [class*="st-key-del_"] button:hover {
+    background: transparent !important;
+    border: none !important; border-left: none !important;
+    opacity: .5; text-align: center !important;
+}
+[class*="st-key-del_"] button:hover { opacity: 1; color: var(--f1-red) !important; }
+
+/* ---- Mensagens ---- */
+[data-testid="stChatMessage"] {
+    background: transparent !important;
+    padding: 1rem 0 !important;
+    border-bottom: 1px solid var(--f1-line) !important;
+}
+[data-testid="stChatMessageAvatar"] {
+    background: transparent !important; border-radius: 50% !important;
+}

@@ -1,0 +1,102 @@
+/* Customização Agapornis AI Core - Estilo Claude + F1 */
+
+/* 1. Reset e Fundo Principal */
+.stApp {
+    background-color: #0d0f12 !important; /* Grafite Fosco/Carbono Profundo */
+    color: #e3e6eb !important;
+    font-family: 'Inter', -apple-system, sans-serif !important;
+}
+
+/* 2. Remover a Barra Superior Nativa do Streamlit */
+header {
+    visibility: hidden !important;
+    height: 0px !important;
+}
+
+/* 3. Remover o Menu de Páginas Lateral Nativo */
+[data-testid="stSidebarNav"] {
+    display: none !important;
+}
+
+/* 4. Estilização dos Cards de Sugestão Centralizados (Removendo cara de dashboard) */
+div[data-testid="stMetric"] {
+    background-color: #16191f !important;
+    border: 1px solid #232731 !important;
+    border-radius: 8px !important;
+    padding: 15px !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+div[data-testid="stMetric"]:hover {
+    border-color: #ff1801 !important; /* Linha de Foco em Vermelho F1 */
+    cursor: pointer;
+    transform: translateY(-2px);
+}
+
+/* 5. Fixar, Centralizar e Expandir a Caixa de Input no Rodapé (Estilo ChatGPT/Claude) */
+div[data-testid="stChatInput"] {
+    position: fixed !important;
+    bottom: 30px !important;
+    left: 55% !important; /* Deslocado levemente para compensar a largura da sidebar */
+    transform: translateX(-50%) !important; /* Centraliza perfeitamente no espaço restante da tela */
+    width: 50% !important; /* Expande o tamanho do chat para um visual limpo e imersivo */
+    background-color: #16191f !important;
+    border: 1px solid #232731 !important;
+    border-radius: 14px !important;
+    z-index: 9999 !important;
+    box-shadow: 0px -5px 25px rgba(0, 0, 0, 0.6) !important; /* Cria efeito de profundidade flutuante */
+}
+
+div[data-testid="stChatInput"]:focus-within {
+    border-color: #ff1801 !important;
+}
+
+/* Ajuste fino da área de digitação interna para herdar o tema escuro */
+div[data-testid="stChatInput"] textarea {
+    background-color: transparent !important;
+    color: #e3e6eb !important;
+}
+
+/* 6. Customização Exclusiva da Sidebar (Sprint 2) */
+[data-testid="stSidebar"] {
+    background-color: #090b0d !important; /* Um tom mais escuro que a Home para dar contraste */
+    border-right: 1px solid #16191f !important;
+}
+
+/* Estilização dos botões do histórico para parecerem abas limpas */
+[data-testid="stSidebar"] .stButton > button {
+    background-color: transparent !important;
+    color: #c9d1d9 !important;
+    border: 1px solid transparent !important;
+    text-align: left !important;
+    padding: 8px 12px !important;
+    transition: all 0.2s ease !important;
+}
+
+/* Efeito de hover nos botões do histórico (Sinalização Vermelho F1 discreta) */
+[data-testid="stSidebar"] .stButton > button:hover {
+    background-color: #16191f !important;
+    border-left: 3px solid #ff1801 !important; /* Linha vermelha na esquerda ao passar o mouse */
+    color: #ffffff !important;
+}
+
+/* 7. Acabamento Premium do Fluxo de Mensagens (Estilo Claude/ChatGPT) */
+[data-testid="stChatMessage"] {
+    background-color: transparent !important; /* Remove blocos cinzas padrão */
+    padding: 1rem 0rem !important;
+    border-bottom: 1px solid #16191f !important; /* Divisor sutil entre as mensagens */
+}
+
+/* Destacar de forma minimalista a mensagem do usuário */
+[data-testid="stChatMessageVisibilityUser"] {
+    background-color: #16191f !important;
+    border-radius: 12px !important;
+    padding: 15px !important;
+    border: 1px solid #232731 !important;
+}
+
+/* Avatar arredondado e transparente para destacar a logo da Agapornis */
+[data-testid="stChatMessageAvatar"] {
+    background-color: transparent !important; /* Remove o fundo sólido */
+    border-radius: 50% !important; /* Deixa o container perfeitamente redondo */
+}

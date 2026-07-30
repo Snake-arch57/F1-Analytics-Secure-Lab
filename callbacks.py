@@ -1,0 +1,67 @@
+import state
+import chat_controller
+
+
+def _fechar_confirmacao():
+    """Desarma o modal de exclusao pendente."""
+    import streamlit as _st
+    _st.session_state.pop("pending_delete_id", None)
+
+
+def on_new_chat_clicked():
+    _fechar_confirmacao()
+    state.clear_session()
+
+
+def on_session_clicked(session_id):
+    _fechar_confirmacao()
+    state.set_current_session_id(session_id)
+    messages = chat_controller.get_chat_messages(session_id)
+    state.set_messages(messages)
+    state.bump_chat_version()
+
+
+def handle_lazy_session_creation(prompt):
+    if state.get_current_session_id() is None:
+        titulo_conversa = prompt[:30] + "..." if len(prompt) > 30 else prompt
+        new_id = chat_controller.create_chat_session(title=titulo_conversa)
+        state.set_current_session_id(new_id)
+        return True
+    return False
+
+
+def save_interaction(session_id, prompt, full_response):
+    chat_controller.save_message(session_id, "user", prompt)
+    chat_controller.save_message(session_id, "assistant", full_response)
+
+
+# ---------- apagar conversa ----------
+
+import streamlit as st
+from app.services.db_service import DBService
+
+
+def on_delete_requested(session_id):
+    """Arma a confirmacao. Nao apaga nada ainda."""
+    st.session_state.pending_delete_id = session_id
+
+
+def on_delete_cancelled():
+    st.session_state.pop("pending_delete_id", None)
+
+
+def on_delete_confirmed(session_id):
+    """Apaga no banco primeiro. So limpa a tela se o DELETE passou."""
+    st.session_state.pop("pending_delete_id", None)
+    try:
+        DBService().apagar_chat(session_id)
+    except Exception as exc:
+        st.session_state.chat_delete_error = "Falha ao apagar: %s" % exc
+        return
+
+    # Se a conversa apagada era a aberta, limpa a area de chat.
+    # Se era outra, o que esta na tela continua intacto.
+    if state.get_current_session_id() == session_id:
+        state.clear_session()
+
+    state.bump_chat_version()

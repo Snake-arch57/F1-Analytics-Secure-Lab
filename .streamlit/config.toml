@@ -1,0 +1,33 @@
+[theme]
+base = "dark"
+font = "Titillium Web, sans-serif"
+headingFont = "Titillium Web, sans-serif"
+baseRadius = "full"
+showWidgetBorder = true
+showSidebarBorder = false
+
+[theme.dark]
+primaryColor = "#E10600"
+backgroundColor = "#15151E"
+secondaryBackgroundColor = "#1F1F2B"
+textColor = "#FFFFFF"
+linkColor = "#FF3B30"
+borderColor = "#2E2E3A"
+
+[theme.dark.sidebar]
+backgroundColor = "#0E0E14"
+secondaryBackgroundColor = "#1F1F2B"
+borderColor = "#2E2E3A"
+
+[theme.light]
+primaryColor = "#E10600"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F2F2F5"
+textColor = "#15151E"
+linkColor = "#C10500"
+borderColor = "#DDDDE3"
+
+[theme.light.sidebar]
+backgroundColor = "#F2F2F5"
+secondaryBackgroundColor = "#FFFFFF"
+borderColor = "#DDDDE3"
