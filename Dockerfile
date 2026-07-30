@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM python:3.14-slim
 
 # Impede escrita de arquivos .pyc e força logs diretos no stdout/stderr
 ENV PYTHONDONTWRITEBYTECODE=1
