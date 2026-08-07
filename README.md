@@ -187,7 +187,6 @@ Corridas que ainda não aconteceram são puladas automaticamente.
 ### 6. Acesse
 http://localhost:8501
 
-Em servidor remoto, troque `localhost` pelo IP da máquina.
 
 ---
 
