@@ -1,0 +1,8 @@
+[extend]
+useDefault = true
+
+[[rules]]
+id = "groq-api-key"
+description = "Chave de API da Groq"
+regex = '''gsk_[A-Za-z0-9]{32,}'''
+keywords = ["gsk_"]
